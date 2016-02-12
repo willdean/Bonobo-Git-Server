@@ -39,6 +39,10 @@ namespace Bonobo.Git.Server.Data
 
         public ADBackendStore(string rootpath, string name)
         {
+            if (rootpath == null)
+            {
+                throw new ArgumentNullException("rootpath");
+            }
             storagePath = Path.Combine(GetRootPath(rootpath), name);
             content = LoadContent();
         }
@@ -144,6 +148,10 @@ namespace Bonobo.Git.Server.Data
 
         private string GetRootPath(string path)
         {
+            if (path == null)
+            {
+                throw new ArgumentNullException("path");
+            }
             return Path.IsPathRooted(path) ? path : HostingEnvironment.MapPath(path);
         }
 

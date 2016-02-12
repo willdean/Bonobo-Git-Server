@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 
@@ -63,7 +65,17 @@ namespace Bonobo.Git.Server.Data
 
         private ADBackend()
         {
+            ValidateWebConfigSettings();
             updateTimer = new Timer(Update, null, TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(180));
+        }
+
+        void ValidateWebConfigSettings()
+        {
+            if (String.IsNullOrEmpty(ActiveDirectorySettings.BackendPath))
+            {
+                //throw new ConfigurationErrorsException("The 'ActiveDirectoryBackendPath' element in web.config appSettings does not appear to be set");
+                Trace.TraceError("CONFIGURATION ERROR: The 'ActiveDirectoryBackendPath' element in web.config appSettings does not appear to be set");
+            }
         }
 
         private void Update(object state)
