@@ -6,6 +6,7 @@ using Bonobo.Git.Server.Configuration;
 using Bonobo.Git.Server.Data;
 using Bonobo.Git.Server.Models;
 using Bonobo.Git.Server.Security;
+using Bonobo.Git.Server.Test.UnitTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Bonobo.Git.Server.Test.MembershipTests
@@ -19,12 +20,9 @@ namespace Bonobo.Git.Server.Test.MembershipTests
         protected IRoleProvider _roles;
 
         [TestInitialize]
-        public void Initialse()
+        public void Initialise()
         {
-            // This file should never actually get created, but ConfigurationManager needs it for its static initialisation
-            var configFileName = Path.Combine(Path.GetTempFileName(), "BonoboTestConfig.xml");
-            ConfigurationManager.AppSettings["UserConfiguration"] = configFileName;
-            UserConfiguration.InitialiseForTest();
+            TestHelpers.InitialiseGlobalConfig();
         }
 
         [TestMethod]

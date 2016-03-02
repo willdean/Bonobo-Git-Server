@@ -8,7 +8,7 @@ namespace Bonobo.Git.Server
 {
     public static class UserExtensions
     {
-        static string GetClaimValue(this IPrincipal user, string claimName)
+        private static string GetClaimValue(this IPrincipal user, string claimName)
         {
             try
             {

@@ -171,6 +171,8 @@
     <Compile Include="TestCategories.cs" />
     <Compile Include="UnitTests\PasswordServiceTest.cs" />
     <Compile Include="UnitTests\GitAuthorizeAttributeTest.cs" />
+    <Compile Include="UnitTests\RepositoryControllerUnitTests.cs" />
+    <Compile Include="UnitTests\TestHelpers.cs" />
     <Compile Include="UnitTests\UserExtensionsTests.cs" />
   </ItemGroup>
   <ItemGroup>
