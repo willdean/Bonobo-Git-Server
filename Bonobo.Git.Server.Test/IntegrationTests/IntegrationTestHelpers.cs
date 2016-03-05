@@ -125,5 +125,23 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Helpers
             Assert.AreEqual(false, has_repo, string.Format("Repository {0} still in Index after deleting!", guid));
         }
 
+        public static void SetCheckbox(IWebElement field, bool select)
+        {
+            if (select)
+            {
+                if (!field.Selected)
+                {
+                    field.Click();
+                }
+            }
+            else
+            {
+                if(field.Selected)
+                {
+                    field.Click();
+                }
+            }
+        }
+
     }
 }

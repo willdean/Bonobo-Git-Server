@@ -46,10 +46,7 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
             var chkboxes = form.WebApp.Browser.FindElementsByCssSelector("form.pure-form>fieldset>div.pure-control-group.checkboxlist>input");
             foreach (var chk in chkboxes)
             {
-                if (!chk.Selected)
-                {
-                    chk.Click();
-                }
+                ITH.SetCheckbox(chk, true);
             }
             form.Submit();
 
@@ -139,21 +136,22 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
 
         }
 
-/*
-        [TestMethod]
+        [TestMethod, TestCategory(TestCategories.WebIntegrationTest)]
         public void RepositoryCanBeSavedBySysAdminWithoutHavingAnyRepoAdmins()
         {
             var repoId = ITH.CreateRepositoryOnWebInterface(app, "Repo");
 
             app.NavigateTo<RepositoryController>(c => c.Edit(repoId));
-            // TODO - need to find all the admin checkboxes here and turn them off
-            app.FindFormFor<RepositoryDetailModel>()
-                .Field(f => f.PostedSelectedAdministrators).SetValueTo("0")
-                .Submit();
+            var form = app.FindFormFor<RepositoryDetailModel>();
+            // there is no specsfor helper, maybe we should write one
+            var chkboxes = form.WebApp.Browser.FindElementsByCssSelector("fieldset>div.pure-control-group.checkboxlist>span>input[name=PostedSelectedAdministrators]");
+            foreach (var chk in chkboxes)
+            {
+                ITH.SetCheckbox(chk, false);
+            }
+            form.Submit();
 
         }
-*/
-
     }
 }
 
