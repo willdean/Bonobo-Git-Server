@@ -1,47 +1,20 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
-using SpecsFor.Mvc;
-
 using Bonobo.Git.Server.Controllers;
 using Bonobo.Git.Server.Models;
-using Bonobo.Git.Server.Test.IntegrationTests.Helpers;
-using Bonobo.Git.Server.Test.IntegrationTests;
 using Bonobo.Git.Server.Data;
 
 namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
 {
-    using ITH = IntegrationTestHelpers;
     using OpenQA.Selenium.Support.UI; 
 
     [TestClass]
-    public class RepositoryControllerTests
+    public class RepositoryControllerTests : IntegrationTestBase
     {
-        private static MvcWebApp app;
-
-        [ClassInitialize]
-        public static void ClassInit(TestContext testContext)
-        {
-            app = new MvcWebApp();
-        }
-
-        [ClassCleanup]
-        public static void Cleanup()
-        {
-            app.Browser.Close();
-        }
-
-        [TestInitialize]
-        public void InitTests()
-        {
-            ITH.Login(app);
-        }
-
         [TestMethod, TestCategory(TestCategories.WebIntegrationTest)]
         public void EnsureCheckboxesStayCheckOnCreateError()
         {
-            var userId = ITH.CreateUsers(app, 1).Single();
+            var userId = ITH.CreateUsers(1).Single();
             try
             {
                 app.NavigateTo<RepositoryController>(c => c.Create());
@@ -63,7 +36,7 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
             }
             finally
             {
-                ITH.DeleteUser(app, userId);
+       //         ITH.DeleteUser(userId);
             }
 
         }
@@ -72,7 +45,7 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
         public void CreateDuplicateRepoNameDifferentCaseNotAllowed()
         {
             var reponame = "A_Nice_Repo";
-            var id1 = ITH.CreateRepositoryOnWebInterface(app, reponame);
+            var id1 = ITH.CreateRepositoryOnWebInterface(reponame);
 
             app.NavigateTo<RepositoryController>(c => c.Create());
             app.FindFormFor<RepositoryDetailModel>()
@@ -82,7 +55,7 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
             app.FindFormFor<RepositoryDetailModel>()
                 .Field(f => f.Name).ShouldBeInvalid();
 
-            ITH.DeleteRepository(app, id1);
+     //       ITH.DeleteRepository(id1);
 
         }
 
@@ -90,7 +63,7 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
         public void CreateDuplicateRepoNameNotAllowed()
         {
             var reponame = "A_Nice_Repo";
-            var id1 = ITH.CreateRepositoryOnWebInterface(app, reponame);
+            var id1 = ITH.CreateRepositoryOnWebInterface(reponame);
 
             app.NavigateTo<RepositoryController>(c => c.Create());
             app.FindFormFor<RepositoryDetailModel>()
@@ -100,16 +73,15 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
             app.FindFormFor<RepositoryDetailModel>()
                 .Field(f => f.Name).ShouldBeInvalid();
 
-            ITH.DeleteRepository(app, id1);
-
+      //      ITH.DeleteRepository(id1);
         }
 
         [TestMethod, TestCategory(TestCategories.WebIntegrationTest)]
         public void RenameRepoToExistingRepoNameNotAllowed()
         {
             var reponame = "A_Nice_Repo";
-            var id1 = ITH.CreateRepositoryOnWebInterface(app, reponame);
-            var id2 = ITH.CreateRepositoryOnWebInterface(app, "other_name");
+            var id1 = ITH.CreateRepositoryOnWebInterface(reponame);
+            var id2 = ITH.CreateRepositoryOnWebInterface("other_name");
 
             app.NavigateTo<RepositoryController>(c => c.Edit(id2));
             app.FindFormFor<RepositoryDetailModel>()
@@ -119,8 +91,10 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
             app.FindFormFor<RepositoryDetailModel>()
                 .Field(f => f.Name).ShouldBeInvalid();
 
-            ITH.DeleteRepository(app, id1);
-            ITH.DeleteRepository(app, id2);
+/*
+            ITH.DeleteRepository(id1);
+            ITH.DeleteRepository(id2);
+*/
 
         }
 
@@ -128,8 +102,8 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
         public void RenameRepoToExistingRepoNameNotAllowedDifferentCase()
         {
             var reponame = "A_Nice_Repo";
-            var id1 = ITH.CreateRepositoryOnWebInterface(app, reponame);
-            var id2 = ITH.CreateRepositoryOnWebInterface(app, "other_name");
+            var id1 = ITH.CreateRepositoryOnWebInterface(reponame);
+            var id2 = ITH.CreateRepositoryOnWebInterface("other_name");
 
             app.NavigateTo<RepositoryController>(c => c.Edit(id2));
             app.FindFormFor<RepositoryDetailModel>()
@@ -139,15 +113,15 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
             app.FindFormFor<RepositoryDetailModel>()
                 .Field(f => f.Name).ShouldBeInvalid();
 
-            ITH.DeleteRepository(app, id1);
-            ITH.DeleteRepository(app, id2);
+      //      ITH.DeleteRepository(id1);
+      //      ITH.DeleteRepository(id2);
 
         }
 
         [TestMethod, TestCategory(TestCategories.WebIntegrationTest)]
         public void RepositoryCanBeSavedBySysAdminWithoutHavingAnyRepoAdmins()
         {
-            var repoId = ITH.CreateRepositoryOnWebInterface(app, "Repo");
+            var repoId = ITH.CreateRepositoryOnWebInterface("Repo");
 
             app.NavigateTo<RepositoryController>(c => c.Edit(repoId));
             var form = app.FindFormFor<RepositoryDetailModel>();
@@ -157,29 +131,31 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
             ITH.SetCheckboxes(chkboxes, false);
 
             form.Submit();
-            ITH.AssertThatNoValidationErrorOccurred(app);
+            ITH.AssertThatNoValidationErrorOccurred();
         }
 
         [TestMethod, TestCategory(TestCategories.WebIntegrationTest)]
         public void RepoAdminCannotRemoveThemselves()
         {
-            var userId = ITH.CreateUsers(app).Single();
+            var userId = ITH.CreateUsers().Single();
 
             try
             {
-                var repoId = ITH.CreateRepositoryOnWebInterface(app, "Repo");
+                var repoId = ITH.CreateRepositoryOnWebInterface("Repo");
 
                 app.NavigateTo<RepositoryController>(c => c.Edit(repoId));
                 var form = app.FindFormFor<RepositoryDetailModel>();
 
-	            // Set User0 to be admin for this repo
-	            var adminBox = form.WebApp.Browser.FindElementsByCssSelector(string.Format("input[name=PostedSelectedAdministrators][value=\"{0}\"]", userId)).Single();
-	            ITH.SetCheckbox(adminBox, true);
-	            form.Submit();
-	            ITH.AssertThatNoValidationErrorOccurred(app);
+                // Set User0 to be admin for this repo
+                var adminBox =
+                    form.WebApp.Browser.FindElementsByCssSelector(
+                        string.Format("input[name=PostedSelectedAdministrators][value=\"{0}\"]", userId)).Single();
+                ITH.SetCheckbox(adminBox, true);
+                form.Submit();
+                ITH.AssertThatNoValidationErrorOccurred();
 
                 // Now, log in as the ordinary user
-                ITH.LoginAsNumberedUser(app, 0);
+                ITH.LoginAsNumberedUser(0);
 
                 app.NavigateTo<RepositoryController>(c => c.Edit(repoId));
                 form = app.FindFormFor<RepositoryDetailModel>();
@@ -188,14 +164,14 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
                 ITH.SetCheckboxes(chkboxes, false);
 
                 form.Submit();
-                ITH.AssertThatValidationErrorContains(app, "You can't remove yourself from administrators");
+                ITH.AssertThatValidationErrorContains("You can't remove yourself from administrators");
             }
             finally
             {
-                ITH.Login(app);
-                ITH.DeleteUser(app, userId);
+                ITH.Login();
+               // ITH.DeleteUser(userId);
             }
-				}
+        }
 
         [TestMethod, TestCategory(TestCategories.WebIntegrationTest)]
         public void RepoAnonPushDefaultSettingsForRepoCreationShouldBeGlobal()
