@@ -372,12 +372,6 @@ namespace Bonobo.Git.Server.Test.Integration.ClAndWeb
             }
         }
 
-        [TestMethod, TestCategory(TestCategories.ClAndWebIntegrationTest)]
-        public void NavigateReposWithDropdown()
-        {
-            
-        }
-
         private void PushFiles(GitInstance git, bool success)
         {
             var res = RunGitOnRepo(git, "push origin master");
