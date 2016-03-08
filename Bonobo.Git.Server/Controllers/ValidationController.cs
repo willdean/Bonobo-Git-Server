@@ -25,9 +25,11 @@ namespace Bonobo.Git.Server.Controllers
         [Dependency]
         public ITeamRepository TeamRepo { get; set; }
 
-        public ActionResult UniqueNameRepo(string name, Guid? guid)
+        public ActionResult UniqueNameRepo(string name, string guid)
         {
-            Guid id = guid.HasValue ? guid.Value : Guid.Empty;
+            //Guid id = guid.HasValue ? guid.Value : Guid.Empty;
+            string sid = Request.QueryString["Id"];
+            Guid id = sid == "undefined" ? Guid.Empty : Guid.Parse(sid);
             var existing_repo = new RepositoryDetailModel();
             try
             {
@@ -45,7 +47,9 @@ namespace Bonobo.Git.Server.Controllers
 
         public ActionResult UniqueNameUser(string Username, Guid? guid)
         {
-            Guid id = guid.HasValue ? guid.Value : Guid.Empty;
+            //Guid id = guid.HasValue ? guid.Value : Guid.Empty;
+            string sid = Request.QueryString["Id"];
+            Guid id = sid == "undefined" ? Guid.Empty : Guid.Parse(sid);
             var possibly_existent_user = MembershipService.GetUserModel(Username);
             bool exists = (possibly_existent_user != null) && (id != possibly_existent_user.Id);
             return Json(!exists, JsonRequestBehavior.AllowGet);
@@ -53,7 +57,9 @@ namespace Bonobo.Git.Server.Controllers
 
         public ActionResult UniqueNameTeam(string name, Guid? guid)
         {
-            Guid id = guid.HasValue ? guid.Value : Guid.Empty;
+            //Guid id = guid.HasValue ? guid.Value : Guid.Empty;
+            string sid = Request.QueryString["Id"];
+            Guid id = sid == "undefined" ? Guid.Empty : Guid.Parse(sid);
             var possibly_existing_team = TeamRepo.GetTeam(name);
             bool exists = (possibly_existing_team != null) && (id != possibly_existing_team.Id);
             // false when repo exists!
