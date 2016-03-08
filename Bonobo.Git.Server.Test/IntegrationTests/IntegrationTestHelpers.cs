@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace Bonobo.Git.Server
 {
@@ -94,10 +95,12 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Helpers
             {
                 name = name.Substring(0, 20) + "..." + name.Substring(name.Length - 20, 20);
             }
+
             app.NavigateTo<RepositoryController>(c => c.Create());
             app.FindFormFor<RepositoryDetailModel>()
                 .Field(f => f.Name).SetValueTo(name)
                 .Submit();
+            app.WaitForElementToBeVisible(By.XPath("//div[@class='summary-success']/p"), TimeSpan.FromSeconds(1), true);
             Guid repoId = FindRepository(app, name);
 
             Assert.IsTrue(repoId != Guid.Empty, string.Format("Repository {0} not found in Index after creation!", name));
@@ -122,8 +125,8 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Helpers
                     .Field(f => f.Name).SetValueTo("Team" + i)
                     .Field(f => f.Description).SetValueTo("Nice team number " + i)
                     .Submit();
+                var item = app.WaitForElementToBeVisible(By.XPath("//div[@class='summary-success']/p"), TimeSpan.FromSeconds(1), true);
                 app.UrlShouldMapTo<TeamController>(c => c.Index());
-                var item = app.Browser.FindElementByXPath("//div[@class='summary-success']/p");
                 string id = item.GetAttribute("id");
                 testteams.Add(new TestTeam(new Guid(id), "Team" + i, app));
             }
@@ -147,14 +150,16 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Helpers
                 app.NavigateTo<AccountController>(c => c.Create());
                 app.FindFormFor<UserCreateModel>()
                     .Field(f => f.Username).SetValueTo("TestUser" + index)
-                    .Field(f => f.Name).SetValueTo("Uname" + index)
+                    .Field(f => f.Name).SetValueTo("Name" + index)
                     .Field(f => f.Surname).SetValueTo("Surname" + index)
-                    .Field(f => f.Email).SetValueTo("mail" + index + "@domain.com")
+                    .Field(f => f.Email).SetValueTo(index + "mail@domain.com")
                     .Field(f => f.Password).SetValueTo("aaa")
                     .Field(f => f.ConfirmPassword).SetValueTo("aaa")
                     .Submit();
+
+                var item = app.WaitForElementToBeVisible(By.XPath("//div[@class='summary-success']/p"), TimeSpan.FromSeconds(1), true);
                 app.UrlShouldMapTo<AccountController>(c => c.Index());
-                var item = app.Browser.FindElementByXPath("//div[@class='summary-success']/p");
+
                 string id = item.GetAttribute("id");
                 testusers.Add(new TestUser(new Guid(id), "TestUser" + index, app));
             }
