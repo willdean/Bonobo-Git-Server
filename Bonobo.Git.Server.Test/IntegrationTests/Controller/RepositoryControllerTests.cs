@@ -1,10 +1,13 @@
-﻿using Bonobo.Git.Server.Controllers;
+﻿using Bonobo.Git.Server.App_GlobalResources;
+using Bonobo.Git.Server.Controllers;
 using Bonobo.Git.Server.Data;
 using Bonobo.Git.Server.Models;
 using Bonobo.Git.Server.Test.IntegrationTests.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using SpecsFor.Mvc;
+using System;
 using System.Linq;
 using System.Reflection;
 
@@ -76,9 +79,10 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
                     .Field(f => f.Name).SetValueTo(id1.Name.ToUpper())
                     .Submit();
 
-                app.FindFormFor<RepositoryDetailModel>()
-                    .Field(f => f.Name).ShouldBeInvalid();
-
+                var field = app.FindFormFor<RepositoryDetailModel>()
+                    .Field(f => f.Name);
+                field.ShouldBeInvalid();
+                Assert.AreEqual(Resources.Validation_Duplicate_Name, field.HasValidationMessage().Text);
             }
         }
 
@@ -93,8 +97,10 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
                     .Field(f => f.Name).SetValueTo(id1.Name)
                     .Submit();
 
-                app.FindFormFor<RepositoryDetailModel>()
-                    .Field(f => f.Name).ShouldBeInvalid();
+                var field = app.FindFormFor<RepositoryDetailModel>()
+                    .Field(f => f.Name);
+                field.ShouldBeInvalid();
+                Assert.AreEqual(Resources.Validation_Duplicate_Name, field.HasValidationMessage().Text);
             }
         }
 
@@ -107,12 +113,14 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
             {
                 app.NavigateTo<RepositoryController>(c => c.Edit(id2));
                 app.FindFormFor<RepositoryDetailModel>()
-                    .Field(f => f.Name).SetValueTo(reponame)
+                    .Field(f => f.Name).SetValueTo(id1.Name)
                     .Submit();
 
-                app.FindFormFor<RepositoryDetailModel>()
-                    .Field(f => f.Name).ShouldBeInvalid();
-
+                var field = app.FindFormFor<RepositoryDetailModel>()
+                    .Field(f => f.Name);
+                field.ShouldBeInvalid();
+                var validationmsg = field.HasValidationMessage();
+                Assert.AreEqual(Resources.Validation_Duplicate_Name, validationmsg.Text);
             }
         }
 
@@ -126,11 +134,13 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
 
                 app.NavigateTo<RepositoryController>(c => c.Edit(id2));
                 app.FindFormFor<RepositoryDetailModel>()
-                    .Field(f => f.Name).SetValueTo(reponame.ToUpper())
+                    .Field(f => f.Name).SetValueTo(id1.Name.ToUpper())
                     .Submit();
 
-                app.FindFormFor<RepositoryDetailModel>()
-                    .Field(f => f.Name).ShouldBeInvalid();
+                var field = app.FindFormFor<RepositoryDetailModel>()
+                    .Field(f => f.Name);
+                field.ShouldBeInvalid();
+                Assert.AreEqual(Resources.Validation_Duplicate_Name, field.HasValidationMessage().Text);
 
             }
         }
@@ -179,7 +189,8 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
                 ITH.SetCheckboxes(chkboxes, false);
 
                 form.Submit();
-                ITH.AssertThatValidationErrorContains(app, "You can't remove yourself from administrators");
+                app.WaitForElementToBeVisible(By.CssSelector("div.validation-summary-errors"), TimeSpan.FromSeconds(1));
+                ITH.AssertThatValidationErrorContains(app, Resources.Repository_Edit_CantRemoveYourself);
             }
             finally
             {
@@ -210,6 +221,9 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
                     .Field(f => f.Description).Click(); // Set focus
 
 
+                var validation = app.WaitForElementToBeVisible(By.CssSelector("input#Name~span.field-validation-error>span"), TimeSpan.FromSeconds(1), true);
+                Assert.AreEqual(Resources.Validation_Duplicate_Name, validation.Text);
+
                 var input = app.Browser.FindElementByCssSelector("input#Name");
                 Assert.IsTrue(input.GetAttribute("class").Contains("input-validation-error"));
 
@@ -229,6 +243,9 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
                     .Field(f => f.Description).Click(); // Set focus
 
 
+                var validation = app.WaitForElementToBeVisible(By.CssSelector("input#Name~span.field-validation-error>span"), TimeSpan.FromSeconds(1), true);
+                Assert.AreEqual(Resources.Validation_Duplicate_Name, validation.Text);
+
                 var input = app.Browser.FindElementByCssSelector("input#Name");
                 Assert.IsTrue(input.GetAttribute("class").Contains("input-validation-error"));
             }
@@ -240,8 +257,10 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Controller
             using (var repo = ITH.CreateRepositoryOnWebInterface(app))
             {
                 app.NavigateTo<RepositoryController>(c => c.Edit(repo));
-                app.FindFormFor<RepositoryDetailModel>()
-                    .Field(f => f.Description).SetValueTo(repo.Name + "_other")
+                var field = app.FindFormFor<RepositoryDetailModel>()
+                    .Field(f => f.Description);
+                field.ValueShouldEqual("");
+                field.SetValueTo(repo.Name + "_other")
                     .Submit();
 
                 app.NavigateTo<RepositoryController>(c => c.Edit(repo)); // force refresh

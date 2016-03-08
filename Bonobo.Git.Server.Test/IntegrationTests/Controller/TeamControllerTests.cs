@@ -1,16 +1,16 @@
-﻿using System;
-using System.Linq;
-using SpecsFor.Mvc;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+﻿using Bonobo.Git.Server.App_GlobalResources;
 using Bonobo.Git.Server.Controllers;
 using Bonobo.Git.Server.Models;
 using Bonobo.Git.Server.Test.IntegrationTests.Helpers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenQA.Selenium;
+using SpecsFor.Mvc;
+using System;
+using System.Linq;
 
 namespace Bonobo.Git.Server.Test.Integration.Web
 {
     using ITH = IntegrationTestHelpers;
-    using System.Collections.Generic;
     public class HomeControllerSpecs
     {
         [TestClass]
@@ -65,6 +65,9 @@ namespace Bonobo.Git.Server.Test.Integration.Web
                         .Field(f => f.Description).Click(); // Set focus
 
 
+                    var validation = app.WaitForElementToBeVisible(By.CssSelector("input#Name~span.field-validation-error>span"), TimeSpan.FromSeconds(1), true);
+                    Assert.AreEqual(Resources.Validation_Duplicate_Name, validation.Text);
+
                     var input = app.Browser.FindElementByCssSelector("input#Name");
                     Assert.IsTrue(input.GetAttribute("class").Contains("input-validation-error"));
 
@@ -79,8 +82,10 @@ namespace Bonobo.Git.Server.Test.Integration.Web
                 using(var id1 = ids[0])
                 {
                     app.NavigateTo<TeamController>(c => c.Edit(id1));
-                    app.FindFormFor<TeamEditModel>()
-                        .Field(f => f.Description).SetValueTo("somename")
+                    var field = app.FindFormFor<TeamEditModel>()
+                        .Field(f => f.Description);
+                    field.ValueShouldEqual("Nice team number " + id1.Name.Substring(id1.Name.Length - 1));
+                    field.SetValueTo("somename")
                         .Submit();
 
                     app.NavigateTo<TeamController>(c => c.Edit(id1)); // force refresh
