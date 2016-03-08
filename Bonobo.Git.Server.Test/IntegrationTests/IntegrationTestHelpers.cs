@@ -52,6 +52,8 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Helpers
 {
     static class IntegrationTestHelpers
     {
+        private static readonly TimeSpan _successElementTimeout = TimeSpan.FromSeconds(10);
+
         public static void Login(MvcWebApp app)
         {
             app.NavigateTo<HomeController>(c => c.LogOn("/Account"));
@@ -100,7 +102,7 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Helpers
             app.FindFormFor<RepositoryDetailModel>()
                 .Field(f => f.Name).SetValueTo(name)
                 .Submit();
-            app.WaitForElementToBeVisible(By.XPath("//div[@class='summary-success']/p"), TimeSpan.FromSeconds(1), true);
+            app.WaitForElementToBeVisible(By.XPath("//div[@class='summary-success']/p"), _successElementTimeout, true);
             Guid repoId = FindRepository(app, name);
 
             Assert.IsTrue(repoId != Guid.Empty, string.Format("Repository {0} not found in Index after creation!", name));
@@ -111,7 +113,7 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Helpers
         {
             app.NavigateTo<AccountController>(c => c.Delete(userId));
             app.FindFormFor<UserModel>().Submit();
-            app.WaitForElementToBeVisible(By.CssSelector("div.summary-success"), TimeSpan.FromSeconds(1));
+            app.WaitForElementToBeVisible(By.CssSelector("div.summary-success"), _successElementTimeout);
             app.UrlShouldMapTo<AccountController>(c => c.Index());
         }
 
@@ -125,7 +127,7 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Helpers
                     .Field(f => f.Name).SetValueTo("Team" + i)
                     .Field(f => f.Description).SetValueTo("Nice team number " + i)
                     .Submit();
-                var item = app.WaitForElementToBeVisible(By.XPath("//div[@class='summary-success']/p"), TimeSpan.FromSeconds(1), true);
+                var item = app.WaitForElementToBeVisible(By.XPath("//div[@class='summary-success']/p"), _successElementTimeout, true);
                 app.UrlShouldMapTo<TeamController>(c => c.Index());
                 string id = item.GetAttribute("id");
                 testteams.Add(new TestTeam(new Guid(id), "Team" + i, app));
@@ -137,7 +139,7 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Helpers
         {
             app.NavigateTo<TeamController>(c => c.Delete(Id));
             app.FindFormFor<TeamEditModel>().Submit();
-            app.WaitForElementToBeVisible(By.CssSelector("div.summary-success"), TimeSpan.FromSeconds(1));
+            app.WaitForElementToBeVisible(By.CssSelector("div.summary-success"), _successElementTimeout);
             app.UrlShouldMapTo<TeamController>(c => c.Index());
         }
 
@@ -157,7 +159,7 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Helpers
                     .Field(f => f.ConfirmPassword).SetValueTo("aaa")
                     .Submit();
 
-                var item = app.WaitForElementToBeVisible(By.XPath("//div[@class='summary-success']/p"), TimeSpan.FromSeconds(1), true);
+                var item = app.WaitForElementToBeVisible(By.XPath("//div[@class='summary-success']/p"), _successElementTimeout, true);
                 app.UrlShouldMapTo<AccountController>(c => c.Index());
 
                 string id = item.GetAttribute("id");
@@ -171,7 +173,7 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Helpers
             app.NavigateTo<RepositoryController>(c => c.Delete(guid));
             app.FindFormFor<RepositoryDetailModel>().Submit();
 
-            app.WaitForElementToBeVisible(By.CssSelector("div.summary-success"), TimeSpan.FromSeconds(1));
+            app.WaitForElementToBeVisible(By.CssSelector("div.summary-success"), _successElementTimeout);
 
             app.UrlShouldMapTo<RepositoryController>(c => c.Index(null, null));
 
