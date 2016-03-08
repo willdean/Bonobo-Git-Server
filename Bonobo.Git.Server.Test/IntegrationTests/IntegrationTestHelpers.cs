@@ -108,6 +108,8 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Helpers
         {
             app.NavigateTo<AccountController>(c => c.Delete(userId));
             app.FindFormFor<UserModel>().Submit();
+            app.WaitForElementToBeVisible(By.CssSelector("div.summary-success"), TimeSpan.FromSeconds(1));
+            app.UrlShouldMapTo<AccountController>(c => c.Index());
         }
 
         public static IEnumerable<TestTeam> CreateTeams(MvcWebApp app, int count = 1, int start = 0)
@@ -132,6 +134,8 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Helpers
         {
             app.NavigateTo<TeamController>(c => c.Delete(Id));
             app.FindFormFor<TeamEditModel>().Submit();
+            app.WaitForElementToBeVisible(By.CssSelector("div.summary-success"), TimeSpan.FromSeconds(1));
+            app.UrlShouldMapTo<TeamController>(c => c.Index());
         }
 
         public static IEnumerable<TestUser> CreateUsers(MvcWebApp app, int count = 1, int start = 0)
@@ -161,6 +165,10 @@ namespace Bonobo.Git.Server.Test.IntegrationTests.Helpers
         {
             app.NavigateTo<RepositoryController>(c => c.Delete(guid));
             app.FindFormFor<RepositoryDetailModel>().Submit();
+
+            app.WaitForElementToBeVisible(By.CssSelector("div.summary-success"), TimeSpan.FromSeconds(1));
+
+            app.UrlShouldMapTo<RepositoryController>(c => c.Index(null, null));
 
             // make sure it no longer is listed
             bool has_repo = false;
